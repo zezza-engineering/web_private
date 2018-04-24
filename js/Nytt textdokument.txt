@@ -1,0 +1,192 @@
+#!/pkg/perl/5.8.6/os/bin/perl
+# Detta skript plockar aktuell lunchmeny från webben, parsar den
+# och skriver ut.
+#
+# Av Jonny Svärling 1996-09-06
+#
+# Y2K-fixad av Erik Rissanen 2000-01-03
+# Lynx ej i standardpathen. Fixat 2001-08-28
+# Nu meny-url Fixat 2002-04-04
+# La till Albanova, samt uppsnyggning Mårten Svantesson 2005-03-04
+# Slutade hämta Albanova från lunchinfo, finns på vanliga stället nu.
+# Fixade utskrift i korrekt encoding beroende på locale  Mårten Svantesson 2005-10-04
+# Datum...
+
+use LWP::Simple;
+use open OUT => ':locale'; # Fixar så att skriptet skriver ut i encoding angiven i aktuell locale
+
+if (@ARGV == 0) {
+  &get_date(time);
+} else {
+  &get_day($ARGV[0]);
+}
+
+if ($day eq "error") {
+  print "\nÖh, vad menar du med '$ARGV[0]'? (skicka med veckodag).\n";
+} elsif ($day eq 'lordag' || $day eq 'sondag') {
+  # Finns ingen mat under helgen :-(
+  print "\nFinns inget käk på helger, dumskalle!\n\n";
+  ;
+} else {
+  &get_and_print_kth_menu;
+  #get_and_print_lunchinfo_menu(5978, "Restaurang Entré / Albanova");
+}
+
+&print_about;
+				
+sub get_and_print_kth_menu {
+    # Header...
+    print "\n";
+    printf("%c[7m", 27);
+    printf("%-79s", " Lunch  $date ($day_real)");
+    printf("%c[0m", 27);
+    print "\n";
+
+    # Hämta menyn...
+    my $response = get "http://www.kth.se/internt/lunch/day_menu.asp?date=$date";
+    unless (defined $response) {
+	print "\nKunde inte hämta menyn!\n";
+	return;
+    }
+
+    # Parsa menyn
+    for $line (split /\n/, $response) {
+
+    # Kanske en resturang rubrik?
+	if ($line =~ /restaurant_menu.asp.*>(.*)<\/A>/) {
+	$name = &transl($1);
+	
+	printf("\n %c[4m$name%c[0m\n\n", 27, 27);
+    }
+	
+	while ($line =~ /<I>([^<]+)<\/I>&nbsp;<\/TD><TD [^>]+>([^<]+)&nbsp;/g) {
+	$typ = $1;
+	$vad = $2;
+	if (!defined $typ) {
+	    $typ = "";
+	}
+	
+	next if ($vad eq "");
+	
+	if (($typ =~ /Dagens/ || $typ =~ /Vegetarisk/) && $name !~ /huset/ && $typ !~ /till/) {	
+	    printf(" %-20s ", $typ);
+	    printf("%c[1m", 27);
+	    print "$vad\n";	
+	    printf("%c[0m", 27);
+	    } else {
+	    printf(" %-20s %s\n", $typ, $vad);
+	}
+    }
+}
+
+close(MENU);
+}
+
+sub get_and_print_lunchinfo_menu {
+
+  my ($id, $header) = @_;
+
+
+  # Hämta menyn...
+  my $response = get "http://www.lunchinfo.se/result.php?utdag=$date&restaurang%5B%5D=$id&stadid=5&part=";
+  unless (defined $response) {
+    print "\nKunde inte hämta menyn!\n";
+    return;
+  }
+  (undef, $response) = split  /rubriksmaller/, $response;
+  my @rows = split /\n/, $response;
+
+  printf("\n %c[4m%s%c[0m\n\n", 27,$header, 27);
+  # Parsa menyn
+
+  while ($line = shift @rows) {
+    while ($line =~ /\r$/) {
+      $spaces=' ' x 21;
+      $line =~ s%<br />\r\n%\n$spaces%;
+      $line .= shift @rows;
+    }
+    if ($line =~ /<td colspan=2 class=notebigger>([^<]*).*class=notebigger>([^<]*)/s) {
+      $vad = $1;
+      $pris = transl($2);
+      next if ($vad eq "");
+	
+      printf(" %-20s %s %s\n", "", $vad, $pris);
+    # Skippar rad utan mat
+    } else {
+      break;
+    }
+    <MENU>;
+  }
+
+  close(MENU);
+}
+
+sub print_about {
+    printf("%c[4m%-80s%c[0m\n\n", 27, "", 27);
+    print(" Av Jonny Svärling och Mårten Svantesson, menyerna kommer från\n");
+    print(" http://www.kth.se/internt/lunch\n");
+    print(" Syntax: lunch [veckodag]  Exempel: lunch onsdag\n\n");
+}
+
+
+# En bra sub
+sub get_date {
+    my @days = ('sondag', 'mandag','tisdag','onsdag',
+		    'torsdag','fredag','lordag');
+    my @days2 = ('Söndag', 'Måndag','Tisdag','Onsdag',
+		    'Torsdag','Fredag','Lördag');
+
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($_[0]);
+
+    $day = $days[$wday];
+    $day_real = $days2[$wday];
+    $date = sprintf("%04d-%02d-%02d", $year + 1900, $mon + 1, $mday);
+    $the_dir = sprintf("%04d/%02d-%02d", $year + 1900, $mon + 1, $mday);
+    $wday = $wday;
+}
+
+sub get_day {
+    my($a) = @_;
+    my @days  = ('sondag', 'mandag','tisdag','onsdag',
+		    'torsdag','fredag','lordag');
+    my @days2 = ('Söndag', 'Måndag','Tisdag','Onsdag',
+		    'Torsdag','Fredag','Lördag');
+    # Regexp för att klara diverse kodningar av åäö
+    my @days3 = ('s..?ndag', 'm..?ndag','tisdag','onsdag',
+		     'torsdag','fredag','l..?rdag');
+
+    my $i = 0;
+    my $found = 0;
+    foreach $d (@days3) {
+	if ($a =~ /$d/i) {
+	    $found = 1;
+	    last;
+	}
+	$i++;
+    }
+    if (!$found) {
+	$day = 'error';
+    }
+    else {
+	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+	    localtime(time);
+	$wday = $wday;
+	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+	    localtime(time + 3600 * 24 * ($i - $wday));
+	
+	$day = $days[$i];
+	$day_real = $days2[$i];
+	$date = sprintf("%04d-%02d-%02d", $year + 1900, $mon + 1, $mday);
+    }
+}
+
+sub transl {
+    my($str) = @_;
+    
+    $str =~ s/&aring;/å/g;
+    $str =~ s/&auml;/ä/g;
+    $str =~ s/&ouml;/ö/g;
+    $str =~ s/&nbsp;/ /g;
+
+    return $str;
+}

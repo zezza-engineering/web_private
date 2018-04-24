@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Lunch</title>
+
+    <!-- CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="../font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<link href="../css/nivo-lightbox.css" rel="stylesheet" />
+	<link href="../css/nivo-lightbox-theme/default/default.css" rel="stylesheet" type="text/css" />
+	<link href="../css/owl.carousel.css" rel="stylesheet" media="screen" />
+    <link href="../css/owl.theme.css" rel="stylesheet" media="screen" />	
+	<link href="../css/animate.css" rel="stylesheet" />
+    <link href="../css/style.css" rel="stylesheet">
+	<link href="../color/default.css" rel="stylesheet">
+
+	<script type="text/javascript">
+		function ld() {
+			if (window.location.hash != '') {
+			  return;
+			}
+			
+			printHeading();
+			parseMenu();
+			
+			var daymap = ["sondag","mandag","tisdag","onsdag","torsdag","fredag","lordag"];
+			var d = new Date();
+			var today = d.getDay();
+			if (today > 1 && today <= 5) {
+			  document.getElementById(daymap[today]).scrollIntoView();
+			}
+		  }
+		  window.onload = ld;
+	</script>
+
+</head>
+
+<body id="page-top" data-spy="scroll" data-target=".navbar-custom">
+	<!-- Preloader -->
+	<div id="preloader">
+	  <div id="load"></div>
+	</div>
+
+	<!-- Navigation -->
+	<div id="navigation">
+		<nav class="navbar navbar-custom" role="navigation">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12">
+	
+					<!-- Brand and toggle get grouped for better mobile display -->
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#menu">
+						<i class="fa fa-bars"></i>
+						</button>
+					</div>
+						<!-- Collect the nav links, forms, and other content for toggling -->
+						<div class="collapse navbar-collapse" id="menu">
+							<ul class="nav navbar-nav">
+									<li class="active"><a href="#intro">Home</a></li>
+									<li><a href="#about">About Me</a></li>
+									<li><a href="#gallery">My gallery</a></li>
+									<li><a href="#food">Food</a></li>                                                                                                             
+									<li><a href="#contact">Contact</a></li>
+							</ul>
+						</div>
+						<!-- /.Navbar-collapse -->
+		
+					</div>
+				</div>
+			</div>
+			<!-- /.container -->
+		</nav>
+	</div> 
+	<!-- /Navigation -->  
+
+	<!-- Section: Lunch -->
+    <section id="lunch" class="lunch">
+
+		<h1 id="h1" onclick="ld()">Lunchmeny</h1>
+	
+		<div class="veckomeny">
+
+			<h2><a id="mandag">Måndag</a></h2>
+			<table class="lm">
+			  <tbody>
+			    <tr class="lght"><th><a href="http://www.annaskok.se/">Annas&nbsp;Kök</a></th><td><ul><li></li></ul></td></tr>
+			  </tbody>
+			</table>
+			
+			<script>
+
+			</script>
+
+		</div>
+	
+	</section>
+	<!-- /Section: Lunch -->
+
+	<footer>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 col-lg-12">
+				</div>
+			</div>	
+		</div>
+	</footer>
+
+    <!-- Core JavaScript Files -->
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/jquery.easing.min.js"></script>	
+	<script src="../js/jquery.sticky.js"></script>
+	<script src="../js/jquery.scrollTo.js"></script>
+	<script src="../js/stellar.js"></script>
+	<script src="../js/wow.min.js"></script>
+	<script src="../js/owl.carousel.min.js"></script>
+	<script src="../js/nivo-lightbox.min.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="../js/custom.js"></script>
+    <script src="../contactform/contactform.js"></script>
+    <script src="../js/lunch.js"></script>
+    
+</body>
+
+</html>
